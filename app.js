@@ -1,39 +1,54 @@
 const nba = require('nba-api-client');
 
 const NBA = require("nba");
-const curry = NBA.findPlayer('Stephen Curry');
-console.log(curry);
-// 1610612745
 
-// console.log(NBA)
+// TODO: Filter through games and find gameID
+// Maybe remove the hardcoded after date
+async function schedule(date){
+	let schedule = NBA.data.teamSchedule("2019", 1610612745).then(result =>{
+		games = result['league']['standard'].filter(game => game['startDateEastern'] > 20200303 )
+		console.log(games);
+	});
+	return gameID;
+}
 
-// console.log(NBA.data.scoreboard().then(result =>{
-// 	console.log(result);
-// }));
-
-// console.log(NBA.data.teamSchedule("2019", 1610612745).then(result =>{
-// 	console.log(result.league.standard);
-// }));
-
-
-// console.log(NBA.stats.scoreboard({ gameDate : '2020-02-02' }).then(result =>{
-// 	console.log(result);
-// }));
-
-let plays =  NBA.stats.playByPlay({ GameID: '0021900892' }).then(result =>{
+//
+async function gamePlays(gameNum) {
+  let plays =  await NBA.stats.playByPlay({ GameID: gameNum }).then(result =>{
 	freeThrows = result['playByPlay'].filter(play =>{
-		if (play['visitordescription'] != null){
-			key = 'visitordescription';
-		}else if (play['homedescription'] != null){
-			key = 'homedescription';
-		}else{
-			return false; 
-		}
+			if (play['visitordescription'] != null){
+				key = 'visitordescription';
+			}else if (play['homedescription'] != null){
+				key = 'homedescription';
+			}else{
+				return false; 
+			}
 
-		return play['eventmsgtype'] ==3 && play[key].includes('Harden');
-	}) 
-	console.log(freeThrows)
-});
+			return play['eventmsgtype'] ==3 && play[key].includes('Harden');
+		}) 
+		console.log(freeThrows)
+		console.log(freeThrows.length)
+	});
+  return plays;
+}
+
+function formatDate(date) {
+    var d = new Date(date),
+        month = '' + (d.getMonth() + 1),
+        day = '' + d.getDate(),
+        year = d.getFullYear();
+
+    if (month.length < 2) 
+        month = '0' + month;
+    if (day.length < 2) 
+        day = '0' + day;
+
+    return [year, month, day].join('');
+}
+
+var dateObj = new Date(); 
+dateObj.setDate(dateObj.getDate() - 1);
+console.log(formatDate(dateObj));
 
 // 0021900892
 // 0021900903
