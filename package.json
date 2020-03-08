@@ -1,0 +1,26 @@
+{
+  "name": "hardenftbot",
+  "version": "1.0.0",
+  "description": "Just trying to learn javascript and I saw this cool api.",
+  "main": "app.js",
+  "dependencies": {
+    "dotenv": "^8.2.0",
+    "nba": "^4.13.0",
+    "nba-api-client": "^1.0.9",
+    "twit": "^2.2.11"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AmanRiat1/HardenFTBot.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/AmanRiat1/HardenFTBot/issues"
+  },
+  "homepage": "https://github.com/AmanRiat1/HardenFTBot#readme"
+}

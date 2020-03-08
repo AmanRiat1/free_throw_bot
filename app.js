@@ -98,7 +98,7 @@ async function getHardenFT(gameNum) {
 //Main
 (async () => {
     let dateObj = new Date();
-    dateObj.setDate(dateObj.getDate() - 2);
+    dateObj.setDate(dateObj.getDate() - 1);
     let yesterdayDate = formatDate(dateObj);
     let gameID = await getGameID(yesterdayDate);
 
