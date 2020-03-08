@@ -18,25 +18,27 @@ async function schedule(date){
 
 //0021900928
 //0021900944
-    // let plays = await NBA.stats.playByPlay({
-    //     GameID: '0021900928'
-    // });
+    let plays = await NBA.stats.playByPlay({
+        GameID: '0021900944'
+    });
 
-    // let freeThrows = plays['playByPlay'].filter(play => {
-    //     if (play['visitordescription'] != null)
-    //         key = 'visitordescription';
-    //     else if (play['homedescription'] != null)
-    //         key = 'homedescription';
-    //     else
-    //         return false;
+    let freeThrows = plays['playByPlay'].filter(play => {
+        if (play['visitordescription'] != null)
+            key = 'visitordescription';
+        else if (play['homedescription'] != null)
+            key = 'homedescription';
+        else
+            return false;
 
-    //     return play['eventmsgtype'] == 3;
-    // });
+        return play['eventmsgtype'] == 3;
+    });
 
-    let x = await NBA.data.boxScore("20200305", "0021900928");
-    if (x['sports_content']['game']['home']['id'] == 1610612755)
-    	console.log(x['sports_content']['game']['visitor']['nickname']);
-    else
-    	console.log(x['sports_content']['game']['home']['nickname']);
+    console.log(freeThrows);
+
+    // let x = await NBA.data.boxScore("20200305", "0021900928");
+    // if (x['sports_content']['game']['home']['id'] == 1610612755)
+    // 	console.log(x['sports_content']['game']['visitor']['nickname']);
+    // else
+    // 	console.log(x['sports_content']['game']['home']['nickname']);
 
 })();	
