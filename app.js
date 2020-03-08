@@ -1,6 +1,7 @@
 const NBA = require("nba");
-
 const TWIT = require('twit');
+const ROCKETS_ID = 1610612745;
+const SEASON = "2019";
 
 require('dotenv').config();
 
@@ -11,25 +12,17 @@ var T = new TWIT({
     access_token_secret: process.env.ACCESS_TOKEN_SECRET
 });
 
-function onAuthenticated(err) {
-    if (err) {
-        console.log(err);
-    } else {
-        console.log('Authentication successful.');
-    }
-}
-
-function sendTweet(ft) {
+function sendTweet(ft, opposingTeam) {
     let tweet;
 
     if (ft < 5)
-        tweet = `A cold night for the beard with only ${ft} free throws.`;
+        tweet = `A cold night for the beard with only ${ft} free throw attempts against the ${opposingTeam}`;
     else if (ft < 10)
-        tweet = `Just a regular night for Harden with ${ft} free throws.`;
+        tweet = `Just a regular night for Harden with ${ft} free throw attempts against the ${opposingTeam}`;
     else if (ft < 15)
-        tweet = `Harden was cooking with ${ft} free throws.`;
+        tweet = `Harden was cooking with ${ft} free throw attempts against the ${opposingTeam}`;
     else
-        tweet = `The beard was in his BAG with ${ft} free throws.`;
+        tweet = `The beard was in his BAG with ${ft} free throw attempts against the ${opposingTeam}`;
 
     T.post('statuses/update', {
         status: tweet
@@ -52,7 +45,7 @@ function formatDate(date) {
 }
 
 async function getGameID(date) {
-    let fullSchedule = await NBA.data.teamSchedule("2019", 1610612745);
+    let fullSchedule = await NBA.data.teamSchedule(SEASON, ROCKETS_ID);
     let schedule = fullSchedule['league']['standard'];
 
     let start = 0,
@@ -73,6 +66,14 @@ async function getGameID(date) {
 
     return false;
 
+}
+
+async function getOpposingTeam(date, gameNum) {
+    let gameBoxScore = await NBA.data.boxScore(date, gameNum);
+    if (gameBoxScore['sports_content']['game']['home']['id'] == ROCKETS_ID)
+        return (gameBoxScore['sports_content']['game']['visitor']['nickname']);
+    else
+        return (gameBoxScore['sports_content']['game']['home']['nickname']);
 }
 
 async function getHardenFT(gameNum) {
@@ -103,19 +104,21 @@ async function getHardenFT(gameNum) {
 
     if (gameID) {
         let ft = await getHardenFT(gameID);
-        console.log(ft);
+        let opposingTeam = await getOpposingTeam(yesterdayDate, gameID)
+        console.log(ft, opposingTeam);
 
-        try {
-            T.get('account/verify_credentials', {
+
+        T.get('account/verify_credentials', {
                 include_entities: false,
                 skip_status: true,
                 include_email: false
-            }, onAuthenticated);
-            sendTweet(ft);
-
-        } catch (err) {
-            console.log('Error with Twitter Account, verify credentials');
-        }
+            })
+            .catch(function(err) {
+                console.log('Error with Twitter Account, verify credentials', err.stack)
+            })
+            .then(function(result) {
+                sendTweet(ft, opposingTeam);
+            })
 
     } else {
         console.log('No game yesterday');
