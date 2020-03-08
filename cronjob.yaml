@@ -2,7 +2,7 @@
 apiVersion: batch/v1beta1
 kind: CronJob
 metadata:
-  name: hello
+  name: tweetHardenFT
 spec:
   schedule: "28 17 * * *"
   jobTemplate:
@@ -11,5 +11,5 @@ spec:
         spec:
           containers:
           - name: tweet
-            image: gcr.io/hardenftbot/hello-app
+            image: hardenft:latest
           restartPolicy: OnFailure
