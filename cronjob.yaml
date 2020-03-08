@@ -11,5 +11,5 @@ spec:
         spec:
           containers:
           - name: tweet
-            image: hardenft:latest
+            image: hardenft
           restartPolicy: OnFailure
