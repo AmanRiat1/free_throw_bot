@@ -2,7 +2,7 @@
 apiVersion: batch/v1beta1
 kind: CronJob
 metadata:
-  name: tweetHardenFT
+  name: tweethardenft
 spec:
   schedule: "28 17 * * *"
   jobTemplate:
