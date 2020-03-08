@@ -1,0 +1,15 @@
+# cronjob.yaml
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: hello
+spec:
+  schedule: "28 17 * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: tweet
+            image: gcr.io/hardenftbot/hello-app
+          restartPolicy: OnFailure
