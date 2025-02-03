@@ -1,6 +1,16 @@
-FROM node:10
+FROM python
+
+# Set the working directory
 WORKDIR /app
-COPY package.json .
-RUN npm install
+
+# Copy the project files into the container
 COPY . .
-CMD [ "node", "app.js" ]
+
+# Install Hatch
+RUN pip install hatch
+
+# Install the Python dependencies using Hatch
+RUN hatch env create
+
+# Run the main.py file using Hatch
+CMD ["hatch", "run", "python", "src/free_throw_bot/main.py"]

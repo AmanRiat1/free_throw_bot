@@ -1,0 +1,26 @@
+# cronjob.yaml
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: postfreethrow
+spec:
+  schedule: "0 8 * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: tweet
+            image: "amanriat/free_throw_bot:latest"
+            env:
+            - name: BSKY_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: bsky-secret
+                  key: BSKY_PASSWORD
+            - name: PLAYER_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: player-config
+                  key: PLAYER_NAME
+          restartPolicy: OnFailure

@@ -1,5 +1,21 @@
-# HardenFTBot
+# free_throw_bot
 
-Just trying to learn javascript and I saw this cool api. 
+[![PyPI - Version](https://img.shields.io/pypi/v/free-throw-bot.svg)](https://pypi.org/project/free-throw-bot)
+[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/free-throw-bot.svg)](https://pypi.org/project/free-throw-bot)
 
-The bot is running on a google kubernetes cluster and tweets Jamees Harden's free throw attempts after every game. Here's the link to the [twitter profile](https://twitter.com/FT97814411)
+-----
+
+## Table of Contents
+
+- [Installation](#installation)
+- [License](#license)
+
+## Installation
+
+```console
+pip install free-throw-bot
+```
+
+## License
+
+`free-throw-bot` is distributed under the terms of the [MIT](https://spdx.org/licenses/MIT.html) license.
