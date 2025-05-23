@@ -3,6 +3,7 @@ import logging
 from typing import Dict
 from datetime import datetime, timedelta
 import pytz
+from json import JSONDecodeError
 
 from atproto import Client
 
@@ -21,16 +22,26 @@ def get_yesterdays_game_id(player_id: int) -> str:
     yesterday_eastern = now_eastern - timedelta(days=1)
     date_str = yesterday_eastern.strftime('%Y-%m-%d')
     
-    gamefinder = leaguegamefinder.LeagueGameFinder(
-        player_id_nullable=player_id,
-        date_from_nullable=date_str,
-        date_to_nullable=date_str,
-        league_id_nullable='00' # NBA league ID
-    )
-    games = gamefinder.get_data_frames()[0]
+    try:
+        gamefinder = leaguegamefinder.LeagueGameFinder(
+            player_id_nullable=player_id,
+            date_from_nullable=date_str,
+            date_to_nullable=date_str,
+            league_id_nullable='00' # NBA league ID
+        )
+        games = gamefinder.get_data_frames()[0]
+    except JSONDecodeError as e:
+        logging.warning(f"NBA API returned non-JSON response when checking for games on {date_str} for player {player_id}. Likely no games found or API issue. Error: {e}")
+        return None
+    except Exception as e: # Optional: Catch other potential errors from nba_api
+        logging.error(f"An unexpected error occurred with LeagueGameFinder for date {date_str}, player {player_id}. Error: {e}")
+        return None
+
     if not games.empty:
         return games.iloc[0]['GAME_ID']
     else:
+        # This path (no games found with valid JSON response) is fine.
+        logging.info(f"No games found for player {player_id} on date {date_str} (valid JSON response).")
         return None
 
 def get_player_game_data(game_id: str, player_id: int) -> Dict[str, any]:
