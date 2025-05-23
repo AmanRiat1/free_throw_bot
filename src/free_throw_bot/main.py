@@ -83,6 +83,6 @@ if __name__ == '__main__':
         opposing_team = player_game_data['opponent_team']
         post = generate_post(PLAYER_NAME, free_throws, opposing_team)
         sent_post = client.send_post(post)
-        logging.info(f"Sent post uri: {sent_post.uri}")
+        logging.info(f"Bluesky post made for game ID {game_id} (Game Date: {game_date}, Script Run Date: {date_one_day_ago}). Post URI: {sent_post.uri}")
     else:
         logging.info("No game data available for today.")
