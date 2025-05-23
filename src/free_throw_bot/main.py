@@ -2,6 +2,7 @@ import os
 import logging
 from typing import Dict
 from datetime import datetime, timedelta
+import pytz
 
 from atproto import Client
 
@@ -13,12 +14,24 @@ def get_player_id(player_name: str) -> int:
     player = [player for player in nba_players if player['full_name'] == player_name][0]
     return player['id']
 
-def get_latest_game_id(player_id: int) -> str:
-    gamefinder = leaguegamefinder.LeagueGameFinder(player_id_nullable=player_id)
+def get_yesterdays_game_id(player_id: int) -> str:
+    now_utc = datetime.now(pytz.utc)
+    eastern = pytz.timezone('US/Eastern')
+    now_eastern = now_utc.astimezone(eastern)
+    yesterday_eastern = now_eastern - timedelta(days=1)
+    date_str = yesterday_eastern.strftime('%Y-%m-%d')
+    
+    gamefinder = leaguegamefinder.LeagueGameFinder(
+        player_id_nullable=player_id,
+        date_from_nullable=date_str,
+        date_to_nullable=date_str,
+        league_id_nullable='00' # NBA league ID
+    )
     games = gamefinder.get_data_frames()[0]
     if not games.empty:
         return games.iloc[0]['GAME_ID']
-    return None
+    else:
+        return None
 
 def get_player_game_data(game_id: str, player_id: int) -> Dict[str, any]:
     boxscore = boxscoretraditionalv2.BoxScoreTraditionalV2(game_id=game_id)
@@ -73,16 +86,20 @@ if __name__ == '__main__':
     client.login('freethrowbot.bsky.social', BSKY_PASSWORD)
     
     player_id = get_player_id(PLAYER_NAME)
-    game_id = get_latest_game_id(player_id)
+    game_id = get_yesterdays_game_id(player_id)
     
-    player_game_data = get_player_game_data(game_id, player_id)
-    game_date = player_game_data['game_date']
-    date_one_day_ago = (datetime.now() - timedelta(days=1)).strftime('%Y-%m-%d')
-    if game_date == date_one_day_ago:
+    if game_id:
+        player_game_data = get_player_game_data(game_id, player_id)
+        # Ensure player_game_data is valid and contains expected keys,
+        # although get_player_game_data should ideally handle this.
+        # For now, we assume it returns valid data if a game_id is processed.
         free_throws = player_game_data['free_throws_made']
         opposing_team = player_game_data['opponent_team']
+        
         post = generate_post(PLAYER_NAME, free_throws, opposing_team)
         sent_post = client.send_post(post)
         logging.info(f"Sent post uri: {sent_post.uri}")
     else:
-        logging.info("No game data available for today.")
+        # To make logging more specific about the date, we could recalculate yesterday's date string here
+        # For now, using a generic message as per the plan.
+        logging.info(f"No game found for {PLAYER_NAME} played yesterday. No post will be made.")

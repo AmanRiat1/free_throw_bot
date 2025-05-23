@@ -28,6 +28,7 @@ dependencies = [
   "atproto",
   "nba_api",
   "pandas",
+  "pytz",
 ]
 
 [project.urls]
