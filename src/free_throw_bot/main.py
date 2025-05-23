@@ -41,10 +41,12 @@ def get_player_game_data(game_id: str, player_id: int) -> Dict[str, any]:
             break
 
     gamefinder = leaguegamefinder.LeagueGameFinder(game_id_nullable=game_id)
-    games = gamefinder.get_data_frames()[0]
-    if not games.empty:
-        game_date = games.iloc[0]['GAME_DATE']
-        game_date = game_date.split('T')[0]
+    games_df = gamefinder.get_data_frames()[0]
+    if not games_df.empty:
+        game_row = games_df[games_df['GAME_ID'] == game_id]
+        if not game_row.empty:
+            game_date = game_row.iloc[0]['GAME_DATE']
+            game_date = game_date.split('T')[0]
 
     return {
         "free_throws_made": free_throws_made,
@@ -77,7 +79,9 @@ if __name__ == '__main__':
     
     player_game_data = get_player_game_data(game_id, player_id)
     game_date = player_game_data['game_date']
+    logging.info(f"Game Date {game_date}")
     date_one_day_ago = (datetime.now() - timedelta(days=1)).strftime('%Y-%m-%d')
+    logging.info(f"Game one day ago {date_one_day_ago}")
     if game_date == date_one_day_ago:
         free_throws = player_game_data['free_throws_made']
         opposing_team = player_game_data['opponent_team']
