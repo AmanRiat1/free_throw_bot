@@ -8,7 +8,7 @@ from json import JSONDecodeError
 from atproto import Client
 
 from nba_api.stats.static import players
-from nba_api.stats.endpoints import leaguegamefinder, boxscoretraditionalv2
+from nba_api.stats.endpoints import leaguegamefinder, boxscoretraditionalv3
 
 def get_player_id(player_name: str) -> int:
     nba_players = players.get_players()
@@ -45,23 +45,33 @@ def get_yesterdays_game_id(player_id: int) -> str:
         return None
 
 def get_player_game_data(game_id: str, player_id: int) -> Dict[str, any]:
-    boxscore = boxscoretraditionalv2.BoxScoreTraditionalV2(game_id=game_id)
+    boxscore = boxscoretraditionalv3.BoxScoreTraditionalV3(game_id=game_id)
     player_stats = boxscore.player_stats.get_dict()
     team_stats = boxscore.team_stats.get_dict()
     
-    free_throws_made = 0
+    free_throw_attempts = 0
     opponent_team = ""
     game_date = ""
+    player_team_id = None
 
     for player in player_stats['data']:
-        if player[player_stats['headers'].index('PLAYER_ID')] == player_id:
-            free_throws_made = player[player_stats['headers'].index('FTM')]
-            player_team_id = player[player_stats['headers'].index('TEAM_ID')]
+        if player[player_stats['headers'].index('personId')] == player_id:
+            free_throw_attempts = player[player_stats['headers'].index('freeThrowsAttempted')]
+            player_team_id = player[player_stats['headers'].index('teamId')]
             break
 
+    if player_team_id is None:
+        logging.warning(f"Could not find player with ID {player_id} in game {game_id}")
+        # Return a dictionary with default/empty values
+        return {
+            "free_throw_attempts": 0,
+            "opponent_team": "",
+            "game_date": ""
+        }
+
     for team in team_stats['data']:
-        if team[team_stats['headers'].index('TEAM_ID')] != player_team_id:
-            opponent_team = team[team_stats['headers'].index('TEAM_NAME')]
+        if team[team_stats['headers'].index('teamId')] != player_team_id:
+            opponent_team = team[team_stats['headers'].index('teamName')]
             break
 
     gamefinder = leaguegamefinder.LeagueGameFinder(game_id_nullable=game_id)
@@ -71,7 +81,7 @@ def get_player_game_data(game_id: str, player_id: int) -> Dict[str, any]:
         game_date = game_date.split('T')[0]
 
     return {
-        "free_throws_made": free_throws_made,
+        "free_throw_attempts": free_throw_attempts,
         "opponent_team": opponent_team,
         "game_date": game_date
     }
@@ -104,7 +114,7 @@ if __name__ == '__main__':
         # Ensure player_game_data is valid and contains expected keys,
         # although get_player_game_data should ideally handle this.
         # For now, we assume it returns valid data if a game_id is processed.
-        free_throws = player_game_data['free_throws_made']
+        free_throws = player_game_data['free_throw_attempts']
         opposing_team = player_game_data['opponent_team']
         
         post = generate_post(PLAYER_NAME, free_throws, opposing_team)
