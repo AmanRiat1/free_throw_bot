@@ -75,10 +75,12 @@ def get_player_game_data(game_id: str, player_id: int) -> Dict[str, any]:
             break
 
     gamefinder = leaguegamefinder.LeagueGameFinder(game_id_nullable=game_id)
-    games = gamefinder.get_data_frames()[0]
-    if not games.empty:
-        game_date = games.iloc[0]['GAME_DATE']
-        game_date = game_date.split('T')[0]
+    games_df = gamefinder.get_data_frames()[0]
+    if not games_df.empty:
+        game_row = games_df[games_df['GAME_ID'] == game_id]
+        if not game_row.empty:
+            game_date = game_row.iloc[0]['GAME_DATE']
+            game_date = game_date.split('T')[0]
 
     return {
         "free_throw_attempts": free_throw_attempts,
@@ -119,7 +121,7 @@ if __name__ == '__main__':
         
         post = generate_post(PLAYER_NAME, free_throws, opposing_team)
         sent_post = client.send_post(post)
-        logging.info(f"Sent post uri: {sent_post.uri}")
+        logging.info(f"Bluesky post made for game ID {game_id} (Game Date: {game_date}, Script Run Date: {date_one_day_ago}). Post URI: {sent_post.uri}")
     else:
         # To make logging more specific about the date, we could recalculate yesterday's date string here
         # For now, using a generic message as per the plan.
